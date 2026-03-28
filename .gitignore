@@ -1,0 +1,39 @@
+# Build outputs
+/build/
+/out/
+/bin/
+/lib/
+*.o
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
+
+# Visual Studio
+.vs/
+*.sln.ide/
+*.vcxproj.user
+*.VC.db
+*.opendb
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

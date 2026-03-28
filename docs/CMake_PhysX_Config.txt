@@ -1,0 +1,41 @@
+# 在你的 CMakeLists.txt 中添加 PhysX 链接
+
+# 设置 PhysX 路径（根据你的安装路径修改）
+set(PHYSX_ROOT "C:/PhysX/physx" CACHE PATH "PhysX SDK root directory")
+set(PHYSX_INCLUDE_DIR "${PHYSX_ROOT}/include")
+set(PHYSX_LIB_DIR "${PHYSX_ROOT}/bin/win.x86_64.vc142.md/release")
+
+# 包含目录
+include_directories(${PHYSX_INCLUDE_DIR})
+
+# 链接库（Debug/Release 分开）
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(PHYSX_LIBS
+        ${PHYSX_LIB_DIR}/PhysX_64.lib
+        ${PHYSX_LIB_DIR}/PhysXCommon_64.lib
+        ${PHYSX_LIB_DIR}/PhysXFoundation_64.lib
+        ${PHYSX_LIB_DIR}/PhysXExtensions_static_64.lib
+        ${PHYSX_LIB_DIR}/PhysXPvdSDK_static_64.lib
+    )
+else()
+    set(PHYSX_LIBS
+        ${PHYSX_LIB_DIR}/PhysX_64.lib
+        ${PHYSX_LIB_DIR}/PhysXCommon_64.lib
+        ${PHYSX_LIB_DIR}/PhysXFoundation_64.lib
+        ${PHYSX_LIB_DIR}/PhysXExtensions_static_64.lib
+        ${PHYSX_LIB_DIR}/PhysXPvdSDK_static_64.lib
+    )
+endif()
+
+# 链接到目标
+target_link_libraries(your_target_name ${PHYSX_LIBS})
+
+# 复制 DLL 到输出目录（Windows）
+if(WIN32)
+    file(GLOB PHYSX_DLLS "${PHYSX_LIB_DIR}/*.dll")
+    foreach(DLL ${PHYSX_DLLS})
+        add_custom_command(TARGET your_target_name POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${DLL} $<TARGET_FILE_DIR:your_target_name>)
+    endforeach()
+endif()
