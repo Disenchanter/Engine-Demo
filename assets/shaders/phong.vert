@@ -13,22 +13,22 @@ uniform mat4 projectionMatrix;
 
 uniform mat3 normalMatrix;
 
-//aPos作为attribute（属性）传入shader
-//不允许更改的
+// aPos is provided as a vertex attribute / 頂点属性として渡される aPos
+// Do not modify the input layout / 入力レイアウトは変更しないでください
 void main()
 {
-// 将输入的顶点位置，转化为齐次坐标（3维-4维）
+    // Convert input vertex position to homogeneous coordinates (3D -> 4D)
 	vec4 transformPosition = vec4(aPos, 1.0);
 
-	//做一个中间变量TransformPosition，用于计算四位位置与modelMatrix相乘的中间结果
+	// Multiply by model matrix to get world-space position
 	transformPosition = modelMatrix * transformPosition;
 
-	//计算当前顶点的worldPosition，并且向后传输给FragmentShader
+	// Pass world position to fragment shader
 	worldPosition = transformPosition.xyz;
 
 	gl_Position = projectionMatrix * viewMatrix * transformPosition;
 	
 	uv = aUV;
-//	normal =  transpose(inverse(mat3(modelMatrix))) * aNormal;
+	// normal matrix transforms normals to world space
 	normal =  normalMatrix * aNormal;
 }

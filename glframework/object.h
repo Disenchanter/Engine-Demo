@@ -16,7 +16,7 @@ public:
 
 	void setRotation(glm::vec3 rotation);
 
-	//增量旋转
+	// Rotate around axes / 軸回転
 	void rotateX(float angle); 
 	void rotateY(float angle); 
 	void rotateZ(float angle); 
@@ -27,28 +27,28 @@ public:
 
 	glm::mat4 getModelMatrix();
 
-	//父子关系
+	// Hierarchy management / 子ノード管理
 	void addChild(Object* obj);
 	std::vector<Object*>  getChildren();
 	Object* getParent();
 
-	//获取类型信息
+	// Get object type / オブジェクトタイプを取得
 	ObjectType getType()const { return mType; }
 
 protected:
 	glm::vec3 mPosition{ 0.0f };
 	
-	//unity旋转标准：pitch yaw roll
+	// Rotation angles: pitch, yaw, roll (Unity convention) / 回転角（ピッチ、ヨー、ロール）
 	float mAngleX{ 0.0f };
 	float mAngleY{ 0.0f };
 	float mAngleZ{ 0.0f };
 
 	glm::vec3 mScale{ 1.0f };
 
-	//父子关系
+	// Children list and parent pointer / 子ノードリストと親ポインタ
 	std::vector<Object*>	mChildren{};
-	Object*					mParent{ nullptr };
+	Object*				mParent{ nullptr };
 
-	//类型记录
+	// Object type record / オブジェクトタイプ
 	ObjectType	mType;
 };

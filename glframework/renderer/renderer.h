@@ -15,8 +15,8 @@ public:
 	Renderer();
 	~Renderer();
 
-	//渲染功能函数：
-	//	每次调用都会渲染一帧
+	// Render frame root function / フレーム描画のエントリポイント
+	// Render the scene for a single frame
 	void render(
 		Scene* scene,
 		Camera* camera,
@@ -32,30 +32,14 @@ public:
 	);
 
 
-
-	//void render(
-	//	const std::vector<Mesh*>& meshes,
-	//	Camera* camera,
-	//	PointLight* pointLight,
-	//	AmbientLight* ambLight
-	//);
-
-	//void render(
-	//	const std::vector<Mesh*>& meshes,
-	//	Camera* camera,
-	//	DirectionalLight* dirLight,
-	//	AmbientLight* ambLight
-	//);
-
 	void setClearColor(glm::vec3 color);
 
 private:
-	//根据Material类型不同，挑选不同的shader
+	// Choose shader based on material type / マテリアルに応じてシェーダを選択
 	Shader* pickShader(MaterialType type);
 
 private:
-	//生成多种不同的shader对象
-	//根据材质类型的不同，挑选使用哪一个shader对象
+	// Shader instances for different material flows / マテリアル別シェーダ
 	Shader* mPhongShader{ nullptr };
 	Shader* mWhiteShader{ nullptr };
 	Shader* mPbrShader{ nullptr };

@@ -7,32 +7,32 @@
 #include<iostream>
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
-	//声明装入shader代码字符串的两个string
+	// Load shader source code from files into strings / シェーダソースをファイルから読み込み
 	std::string vertexCode;
 	std::string fragmentCode;
 
-	//声明用于读取vs跟fs文件的inFileStream
+	// File streams for reading vertex/fragment shader files
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
 
-	//保证ifstream遇到问题的时候可以抛出异常
+	// Enable exceptions for file IO
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
-		//1 打开文件
+		// 1: Open files
 		vShaderFile.open(vertexPath);
 		fShaderFile.open(fragmentPath);
 		
-		//2 将文件输入流当中的字符串输入到stringStream里面
+		// 2: Read file contents into stringstreams
 		std::stringstream vShaderStream, fShaderStream;
 		vShaderStream << vShaderFile.rdbuf();
 		fShaderStream << fShaderFile.rdbuf();
 
-		//3 关闭文件
+		// 3: Close files
 		vShaderFile.close();
 		fShaderFile.close();
 
-		//4 将字符串从stringStream当中读取出来，转化到code String当中
+		// 4: Convert stringstreams to strings
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
 	}
@@ -42,38 +42,38 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 
 	const char* vertexShaderSource = vertexCode.c_str();
 	const char* fragmentShaderSource = fragmentCode.c_str();
-	//1 创建Shader程序（vs、fs）
+	// 1: Create shader objects (vertex and fragment)
 	GLuint vertex, fragment;
 	vertex = glCreateShader(GL_VERTEX_SHADER);
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-	//2 为shader程序输入shader代码
+	// 2: Attach source to shaders
 	glShaderSource(vertex, 1, &vertexShaderSource, NULL);
 	glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
 
-	//3 执行shader代码编译 
+	// 3: Compile shaders
 	glCompileShader(vertex);
-	//检查vertex编译结果
+	// Check vertex compile errors
 	checkShaderErrors(vertex, "COMPILE");
 	
 	glCompileShader(fragment);
-	//检查fragment编译结果
+	// Check fragment compile errors
 	checkShaderErrors(fragment, "COMPILE");
 	
-	//4 创建一个Program壳子
+	// 4: Create program
 	mProgram = glCreateProgram();
 
-	//6 将vs与fs编译好的结果放到program这个壳子里
+	// 6: Attach shaders to program
 	glAttachShader(mProgram, vertex);
 	glAttachShader(mProgram, fragment);
 
-	//7 执行program的链接操作，形成最终可执行shader程序
+	// 7: Link program (this will link compiled shaders)
 	glLinkProgram(mProgram);
 
-	//检查链接错误
+	// Check link errors
 	checkShaderErrors(mProgram, "LINK");
 
-	//清理
+	// Cleanup shader objects
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
 }
@@ -90,62 +90,59 @@ void Shader::end() {
 }
 
 void Shader::setFloat(const std::string& name, float value) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 
-	//2 通过Location更新Uniform变量的值
+	// 2: Set float uniform
 	GL_CALL(glUniform1f(location, value));
 }
 
 void Shader::setVector3(const std::string& name, float x, float y, float z) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 	
-	//2 通过Location更新Uniform变量的值
+	// 2: Set vec3 uniform
 	GL_CALL(glUniform3f(location, x, y, z));
 }
 
-//重载 overload
+// Overload: set vec3 from array
 void Shader::setVector3(const std::string& name, const float* values) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 
-	//2 通过Location更新Uniform变量的值
-	//第二个参数：你当前要更新的uniform变量如果是数组，数组里面包括多少个向量vec3
+	// 2: Set vec3 uniform by pointer
 	GL_CALL(glUniform3fv(location, 1, values));
 }
 
 void Shader::setVector3(const std::string& name, const glm::vec3 value) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 
-	//2 通过Location更新Uniform变量的值
+	// 2: Set vec3 uniform
 	GL_CALL(glUniform3f(location, value.x, value.y, value.z));
 }
 
 void Shader::setInt(const std::string& name, int value) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 
-	//2 通过Location更新Uniform变量的值
+	// 2: Set int uniform
 	glUniform1i(location, value);
 }
 
 void Shader::setMatrix4x4(const std::string& name, glm::mat4 value) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 	
-	//2 通过Location更新Uniform变量的值
-	//transpose参数：表示是否对传输进去的矩阵数据进行转置
+	// 2: Set matrix uniform (no transpose)
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::setMatrix3x3(const std::string& name, glm::mat3 value) {
-	//1 通过名称拿到Uniform变量的位置Location
+	// 1: Get uniform location
 	GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
 
-	//2 通过Location更新Uniform变量的值
-	//transpose参数：表示是否对传输进去的矩阵数据进行转置
+	// 2: Set matrix uniform (no transpose)
 	glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 

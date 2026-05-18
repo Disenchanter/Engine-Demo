@@ -8,7 +8,7 @@
 #include "application/Application.h"
 #include "glframework/texture.h"
 
-//引入相机+控制器
+// カメラとコントローラをインクルード / Include cameras and controllers
 #include "application/camera/perspectiveCamera.h"
 #include "application/camera/orthographicCamera.h"
 #include "application/camera/trackBallCameraControl.h"
@@ -38,7 +38,7 @@ Renderer* renderer = nullptr;
 Scene* scene = nullptr;
 Object* sceneRoot = nullptr;
 
-//灯光们
+// ライト / Lights
 DirectionalLight* dirLight = nullptr;
 
 AmbientLight* ambLight = nullptr;
@@ -48,7 +48,7 @@ CameraControl* cameraControl = nullptr;
 
 glm::vec3 clearColor{};
 
-//for dynamic mesh creation
+// 動的メッシュ作成用 / For dynamic mesh creation
 int shapeType = 0; // 0: Box, 1: Sphere
 float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
 float shapeSize = 1.0f;
@@ -65,19 +65,19 @@ void OnKey(int key, int action, int mods) {
 	cameraControl->onKey(key, action, mods);
 }
 
-//鼠标按下/抬起
+// マウス押下 / release handler / Mouse press/release
 void OnMouse(int button, int action, int mods) {
 	double x, y;
 	app->getCursorPosition(&x, &y);
 	cameraControl->onMouse(button, action, x, y);
 }
 
-//鼠标移动
+// マウス移動 / Mouse move
 void OnCursor(double xpos, double ypos) {
 	cameraControl->onCursor(xpos, ypos);
 }
 
-//鼠标滚轮
+// マウスホイール / Mouse scroll
 void OnScroll(double offset) {
 	cameraControl->onScroll(offset);
 }
@@ -88,11 +88,11 @@ void prepare() {
 	sceneRoot = new Object();
 	scene->addChild(sceneRoot);
 
-	//1 创建geometry
+	// 1. ジオメトリ作成 / Create geometries
 	auto boxGeometry = Geometry::createBox(1.0f);
 	auto spGeometry = Geometry::createSphere(1.0f);
 
-	//2 创建不同的PBR材质参数
+	// 2. 異なる PBR マテリアルパラメータの作成 / Create different PBR material parameters
 	boxMaterial = new PBRMaterial();
 	((PBRMaterial*)boxMaterial)->mAlbedo = new Texture("assets/textures/earth.png", 0);
 	((PBRMaterial*)boxMaterial)->mMetallic = new Texture("assets/textures/sp_mask.png", 1);
@@ -111,7 +111,7 @@ void prepare() {
 	((PBRMaterial*)sphereMaterial)->mRoughnessFactor = 0.45f;
 	((PBRMaterial*)sphereMaterial)->mAOFactor = 1.0f;
 
-	//3 创建mesh
+	// 3. メッシュ作成 / Create meshes
 	auto mesh = new Mesh(boxGeometry, boxMaterial);
 	auto spMesh01 = new Mesh(spGeometry, sphereMaterial);
 	auto spMesh02 = new Mesh(spGeometry, sphereMaterial);
@@ -132,7 +132,7 @@ void prepare() {
 	spTransform02.position = glm::vec3(-2.0f, 0.0f, 0.0f);
 	registry.add<ecs::MeshComponent>(spEntity02, spMesh02);
 
-	// 使用ECS同步位置时，保持同一个空节点下的并列关系
+	// ECS による transform 同期時は、同一の空ルート下へ追加する / Keep under single empty root to avoid transform conflicts
 	sceneRoot->addChild(mesh);
 	sceneRoot->addChild(spMesh01);
 	sceneRoot->addChild(spMesh02);
@@ -149,7 +149,7 @@ void addMeshToScene() {
 	Geometry* geometry = nullptr;
 	Material* material = nullptr;
 
-	//create geometry based on shape type
+	// 形状に応じてジオメトリ作成 / Create geometry based on shape type
 	if (shapeType == 0) {
 		geometry = Geometry::createBox(shapeSize);
 		material = boxMaterial;
@@ -159,7 +159,7 @@ void addMeshToScene() {
 		material = sphereMaterial;
 	}
 
-	//create mesh with selected material
+	// メッシュ作成 / Create mesh with selected material
 	auto newMesh = new Mesh(geometry, material);
 	newMesh->setPosition(glm::vec3(posX, posY, posZ));
 
@@ -168,13 +168,13 @@ void addMeshToScene() {
 	transform.position = glm::vec3(posX, posY, posZ);
 	registry.add<ecs::MeshComponent>(entity, newMesh);
 	
-	//add to scene root
+	// シーンルートへ追加 / Add to scene root
 	sceneRoot->addChild(newMesh);
 }
 
 void prepareCamera() {
 	float size = 10.0f;
-	//camera = new OrthographicCamera(-size, size, size, -size, size, -size);
+	// camera = new OrthographicCamera(-size, size, size, -size, size, -size);
 	camera = new PerspectiveCamera(
 		60.0f, 
 		(float)app->getWidth() / (float)app->getHeight(),
@@ -190,21 +190,21 @@ void prepareCamera() {
 
 
 void initIMGUI() {
-	ImGui::CreateContext();//创建imgui上下文
-	ImGui::StyleColorsDark(); // 选择一个主题
+	ImGui::CreateContext(); // ImGui コンテキスト作成 / Create ImGui context
+	ImGui::StyleColorsDark(); // ダークテーマ選択 / Use dark style
 
-	// 设置ImGui与GLFW和OpenGL的绑定
+	// ImGui の GLFW + OpenGL バインディング設定 / Setup ImGui binding for GLFW & OpenGL
 	ImGui_ImplGlfw_InitForOpenGL(app->getWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 460");
 }
 
 void renderIMGUI() {
-	//1 开启当前的IMGUI 渲染
+	// 1. 新しい ImGui フレームを開始 / Start new ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	//2 决定当前的GUI上面有哪些控件，从上到下
+	// 2. GUI 要素の構築 / Build GUI widgets
 	ImGui::Begin("Scene Controls");
 	ImGui::Text("ChangeColor Demo");
 	ImGui::Button("Test Button", ImVec2(40, 20));
@@ -213,31 +213,31 @@ void renderIMGUI() {
 	ImGui::Separator();
 	ImGui::Text("Add Object to Scene");
 	
-	//shape type selection
+	// 形状タイプ選択 / Shape type selection
 	const char* shapeOptions[] = { "Box", "Sphere" };
 	ImGui::Combo("Shape Type##shape", &shapeType, shapeOptions, IM_ARRAYSIZE(shapeOptions));
 	
-	//position input
+	// 位置入力 / Position input
 	ImGui::DragFloat("Position X##x", &posX, 0.1f);
 	ImGui::DragFloat("Position Y##y", &posY, 0.1f);
 	ImGui::DragFloat("Position Z##z", &posZ, 0.1f);
 	
-	//size input
+	// サイズ入力 / Size input
 	ImGui::SliderFloat("Size", &shapeSize, 0.1f, 5.0f);
 	
-	//create button
+	// 作成ボタン / Create button
 	if (ImGui::Button("Create Object", ImVec2(100, 30))) {
 		addMeshToScene();
 	}
 	
 	ImGui::End();
 
-	//3 执行UI渲染
+	// 3. ImGui レンダリング / Render ImGui
 	ImGui::Render();
-	//获取当前窗体的宽高
+	// フレームバッファサイズを取得 / Get framebuffer size
 	int display_w, display_h;
 	glfwGetFramebufferSize(app->getWindow(), &display_w, &display_h);
-	//重置视口大小
+	// ビューポートをリセット / Reset viewport size
 	glViewport(0, 0, display_w, display_h);
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -254,7 +254,7 @@ int main() {
 	app->setCursorCallback(OnCursor);
 	app->setScrollCallback(OnScroll);
 
-	//设置opengl视口以及清理颜色
+	// OpenGL ビューポートとクリア色の設定 / Setup OpenGL viewport and clear color
 	GL_CALL(glViewport(0, 0, 1600, 1200));
 	GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 
